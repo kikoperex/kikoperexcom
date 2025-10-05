@@ -6,15 +6,27 @@
     <title>KikoPerex</title>
     <style>
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, 
-sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             line-height: 1.6; 
             background-color: #121212; 
             color: #e0e0e0; 
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Evita barras de scroll por los elementos flotantes */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        /* Contenedor principal para el contenido estático */
+        .content-container {
             max-width: 800px; 
             margin: 40px auto; 
-            padding: 20px; 
+            padding: 20px;
+            position: relative;
+            z-index: 5; /* Asegura que el contenido de texto esté accesible */
         }
+
         h1 { color: #bb86fc; }
         .principio { 
             background-color: #1e1e1e; 
@@ -22,20 +34,209 @@ sans-serif;
             padding: 15px; 
             margin-bottom: 20px; 
         }
+        a {
+            color: #03dac6;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Estilos para las carpetas flotantes */
+        .folder {
+            position: absolute;
+            z-index: 10;
+            width: 100px;
+            text-align: center;
+            cursor: grab;
+            user-select: none; /* Evita que el texto se seleccione al arrastrar */
+            touch-action: none; /* Para evitar comportamiento por defecto en pantallas táctiles */
+        }
+        .folder.dragging {
+            cursor: grabbing;
+            z-index: 1000; /* Pone la carpeta que se arrastra por encima de las demás */
+            transform: translateZ(0); /* Promueve la carpeta a su propia capa para un movimiento más suave */
+        }
+        .folder a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+        .folder img, .folder svg {
+            width: 80px;
+            height: auto;
+            pointer-events: none; /* Asegura que el evento de arrastre se aplique al div y no a la imagen */
+            -webkit-user-drag: none; /* Evita el drag nativo en WebKit */
+        }
+        .folder span {
+            margin-top: 8px;
+            pointer-events: none;
+        }
+
+        /* Estilos para los links del footer */
+        .footer-links {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            font-family: monospace;
+        }
+        .footer-links pre {
+            margin: 0;
+            color: #e0e0e0;
+        }
     </style>
 </head>
 <body>
 
-    <h1>KikoPerex Acervo</h1>
+    <!-- Contenedor para los elementos que se pueden arrastrar -->
+    <div id="desktop">
+        <!-- Carpeta 1: system-logs -->
+        <div class="folder" id="folder-system" style="top: 20%; left: 30%;">
+            <a href="/#system-logs">
+                <!-- SVG del icono de la carpeta. Puedes cambiar el 'fill' para el color -->
+                <svg viewBox="0 0 24 24" fill="#ff8ffc" xmlns="http://www.w3.org/2000/svg"><path d="M10 4H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8c0-1.11-.9-2-2-2h-8l-2-2z"></path></svg>
+                <span>system-logs</span>
+            </a>
+        </div>
 
-    <pre>
-        OS: kikOS v0.1 (Codename: Argentum)
-        State: online / kernel re-build
-        Zygote: attain_root 
-    </pre>
+        <!-- Carpeta 2: Sobre Mí -->
+        <div class="folder" id="folder-sobre-mi" style="top: 55%; left: 60%;">
+            <a href="/#me">
+                <svg viewBox="0 0 24 24" fill="#bb86fc" xmlns="http://www.w3.org/2000/svg"><path d="M10 4H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8c0-1.11-.9-2-2-2h-8l-2-2z"></path></svg>
+                <span>me</span>
+            </a>
+        </div>
+    </div>
 
-    <a href="https://www.instagram.com/iblame.kiko/">ig</a>
-    <a href="https://github.com/kikoperex">github</a>
+    <!-- Tu contenido original -->
+    <div class="content-container">
+			<pre><h1>KikoPerex Acervo</h1></pre>
+        <pre>OS: kikOS v0.2 (Codename: Argentum)
+State: online / kernel re-build
+Zygote: attain_root</pre>
+    </div>
+
+    <!-- Links de footer -->
+    <div class="footer-links">
+        <pre><a href="https://www.instagram.com/iblame.kiko/" target="_blank" rel="noopener noreferrer">instagram</a> / <a href="https://github.com/kikoperex" target="_blank" rel="noopener noreferrer">github</a></pre>
+    </div>
+
+    <script>
+        const desktop = document.getElementById('desktop');
+        let activeFolder = null;
+        let pointerId = null;
+        let offsetX = 0;
+        let offsetY = 0;
+        let moved = false; 
+
+        document.addEventListener('dragstart', (e) => e.preventDefault());
+
+        desktop.addEventListener('pointerdown', (e) => {
+            const folder = e.target.closest('.folder');
+            if (!folder || e.button !== 0) return;
+
+            e.preventDefault();
+            activeFolder = folder;
+            pointerId = e.pointerId;
+            moved = false;
+
+            const rect = activeFolder.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+
+            try {
+                activeFolder.setPointerCapture(pointerId);
+            } catch (err) {
+            }
+
+            activeFolder.classList.add('dragging');
+        });
+
+        desktop.addEventListener('pointermove', (e) => {
+            if (!activeFolder || e.pointerId !== pointerId) return;
+            e.preventDefault();
+
+            moved = true;
+
+            let newX = e.clientX - offsetX;
+            let newY = e.clientY - offsetY;
+
+            const maxX = window.innerWidth - activeFolder.offsetWidth;
+            const maxY = window.innerHeight - activeFolder.offsetHeight;
+
+            activeFolder.style.left = `${Math.max(0, Math.min(newX, maxX))}px`;
+            activeFolder.style.top = `${Math.max(0, Math.min(newY, maxY))}px`;
+        });
+
+        desktop.addEventListener('pointerup', (e) => {
+            if (!activeFolder || e.pointerId !== pointerId) return;
+
+            try {
+                activeFolder.releasePointerCapture(pointerId);
+            } catch (err) {}
+
+            activeFolder.classList.remove('dragging');
+
+            if (moved) {
+                const draggedFolder = activeFolder;
+                setTimeout(() => { moved = false; }, 0);
+                setTimeout(() => { if (draggedFolder) draggedFolder.style.zIndex = ''; }, 0);
+            }
+
+            activeFolder = null;
+            pointerId = null;
+        });
+
+        document.querySelectorAll('.folder a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (moved) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                }
+            });
+        });
+
+        window.addEventListener('pointercancel', () => {
+            if (!activeFolder) return;
+            try { activeFolder.releasePointerCapture(pointerId); } catch (err) {}
+            activeFolder.classList.remove('dragging');
+            activeFolder = null;
+            pointerId = null;
+            moved = false;
+        });
+
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.folder').forEach(f => {
+                const left = f.style.left;
+                const top = f.style.top;
+                if (left && left.includes('%')) {
+                    const px = Math.round((parseFloat(left) / 100) * window.innerWidth);
+                    f.style.left = px + 'px';
+                }
+                if (top && top.includes('%')) {
+                    const py = Math.round((parseFloat(top) / 100) * window.innerHeight);
+                    f.style.top = py + 'px';
+                }
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            document.querySelectorAll('.folder').forEach(f => {
+                const maxX = window.innerWidth - f.offsetWidth;
+                const maxY = window.innerHeight - f.offsetHeight;
+                let curLeft = f.offsetLeft;
+                let curTop = f.offsetTop;
+                if (curLeft > maxX) f.style.left = maxX + 'px';
+                if (curTop > maxY) f.style.top = maxY + 'px';
+            });
+        });
+    </script>
 
 </body>
 </html>
+
