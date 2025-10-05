@@ -1,9 +1,10 @@
 const desktop = document.getElementById('desktop');
 let activeFolder = null;
 let pointerId = null;
-let offsetX = 0;
-let offsetY = 0;
-let moved = false; 
+let startX = 0;
+let startY = 0;
+
+const DRAG_THRESHOLD = 5; // Umbral de movimiento en píxeles
 
 document.addEventListener('dragstart', (e) => e.preventDefault());
 
@@ -11,74 +12,90 @@ desktop.addEventListener('pointerdown', (e) => {
     const folder = e.target.closest('.folder');
     if (!folder || e.button !== 0) return;
 
-    e.preventDefault();
+    // Prevenimos el comportamiento por defecto solo si es un enlace, para no bloquear otros eventos.
+    if (e.target.tagName === 'A') {
+        e.preventDefault();
+    }
+
     activeFolder = folder;
     pointerId = e.pointerId;
-    moved = false;
+    
+    startX = e.clientX;
+    startY = e.clientY;
 
     const rect = activeFolder.getBoundingClientRect();
-    offsetX = e.clientX - rect.left;
-    offsetY = e.clientY - rect.top;
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
 
     try {
         activeFolder.setPointerCapture(pointerId);
     } catch (err) {
+        console.error("Pointer capture failed:", err);
     }
 
     activeFolder.classList.add('dragging');
+
+    const onPointerMove = (moveEvent) => {
+        if (moveEvent.pointerId !== pointerId) return;
+
+        let newX = moveEvent.clientX - offsetX;
+        let newY = moveEvent.clientY - offsetY;
+
+        const maxX = window.innerWidth - activeFolder.offsetWidth;
+        const maxY = window.innerHeight - activeFolder.offsetHeight;
+
+        activeFolder.style.left = `${Math.max(0, Math.min(newX, maxX))}px`;
+        activeFolder.style.top = `${Math.max(0, Math.min(newY, maxY))}px`;
+    };
+
+    const onPointerUp = (upEvent) => {
+        if (upEvent.pointerId !== pointerId) return;
+
+        desktop.removeEventListener('pointermove', onPointerMove);
+        desktop.removeEventListener('pointerup', onPointerUp);
+
+        try {
+            activeFolder.releasePointerCapture(pointerId);
+        } catch (err) {}
+
+        activeFolder.classList.remove('dragging');
+
+        const deltaX = Math.abs(startX - upEvent.clientX);
+        const deltaY = Math.abs(startY - upEvent.clientY);
+
+        if (deltaX > DRAG_THRESHOLD || deltaY > DRAG_THRESHOLD) {
+            const link = activeFolder.querySelector('a');
+            if (link) {
+                const preventClick = (clickEvent) => {
+                    clickEvent.preventDefault();
+                    clickEvent.stopImmediatePropagation();
+                };
+                link.addEventListener('click', preventClick, { once: true, capture: true });
+            }
+        } else {
+            // Si no fue un arrastre, disparamos el clic en el enlace.
+            const link = activeFolder.querySelector('a');
+            if (link) {
+                link.click();
+            }
+        }
+        
+        activeFolder = null;
+    };
+
+    desktop.addEventListener('pointermove', onPointerMove);
+    desktop.addEventListener('pointerup', onPointerUp);
 });
 
-desktop.addEventListener('pointermove', (e) => {
+window.addEventListener('pointercancel', (e) => {
     if (!activeFolder || e.pointerId !== pointerId) return;
-    e.preventDefault();
-
-    moved = true;
-
-    let newX = e.clientX - offsetX;
-    let newY = e.clientY - offsetY;
-
-    const maxX = window.innerWidth - activeFolder.offsetWidth;
-    const maxY = window.innerHeight - activeFolder.offsetHeight;
-
-    activeFolder.style.left = `${Math.max(0, Math.min(newX, maxX))}px`;
-    activeFolder.style.top = `${Math.max(0, Math.min(newY, maxY))}px`;
-});
-
-desktop.addEventListener('pointerup', (e) => {
-    if (!activeFolder || e.pointerId !== pointerId) return;
-
+    
     try {
         activeFolder.releasePointerCapture(pointerId);
     } catch (err) {}
-
-    activeFolder.classList.remove('dragging');
-
-    if (moved) {
-        const draggedFolder = activeFolder;
-        setTimeout(() => { moved = false; }, 0);
-        setTimeout(() => { if (draggedFolder) draggedFolder.style.zIndex = ''; }, 0);
-    }
-
-    activeFolder = null;
-    pointerId = null;
-});
-
-document.querySelectorAll('.folder a').forEach(link => {
-    link.addEventListener('click', (e) => {
-        if (moved) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-        }
-    });
-});
-
-window.addEventListener('pointercancel', () => {
-    if (!activeFolder) return;
-    try { activeFolder.releasePointerCapture(pointerId); } catch (err) {}
+    
     activeFolder.classList.remove('dragging');
     activeFolder = null;
-    pointerId = null;
-    moved = false;
 });
 
 window.addEventListener('load', () => {
