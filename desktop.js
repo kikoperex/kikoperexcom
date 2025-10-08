@@ -79,6 +79,8 @@ desktop.addEventListener('pointerdown', (e) => {
                 link.click();
             }
         }
+
+        localStorage.setItem(activeFolder.id, JSON.stringify({ left: activeFolder.style.left, top: activeFolder.style.top }));
         
         activeFolder = null;
     };
@@ -100,15 +102,22 @@ window.addEventListener('pointercancel', (e) => {
 
 window.addEventListener('load', () => {
     document.querySelectorAll('.folder').forEach(f => {
-        const left = f.style.left;
-        const top = f.style.top;
-        if (left && left.includes('%')) {
-            const px = Math.round((parseFloat(left) / 100) * window.innerWidth);
-            f.style.left = px + 'px';
-        }
-        if (top && top.includes('%')) {
-            const py = Math.round((parseFloat(top) / 100) * window.innerHeight);
-            f.style.top = py + 'px';
+        const savedPosition = localStorage.getItem(f.id);
+        if (savedPosition) {
+            const { left, top } = JSON.parse(savedPosition);
+            f.style.left = left;
+            f.style.top = top;
+        } else {
+            const left = f.style.left;
+            const top = f.style.top;
+            if (left && left.includes('%')) {
+                const px = Math.round((parseFloat(left) / 100) * window.innerWidth);
+                f.style.left = px + 'px';
+            }
+            if (top && top.includes('%')) {
+                const py = Math.round((parseFloat(top) / 100) * window.innerHeight);
+                f.style.top = py + 'px';
+            }
         }
     });
 });
