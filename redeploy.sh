@@ -1,5 +1,3 @@
-#!/bin/bash
-
 podman stop nginx || true
 
 podman rm nginx || true

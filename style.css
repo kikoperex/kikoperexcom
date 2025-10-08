@@ -5,19 +5,18 @@ body {
     color: #e0e0e0; 
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Evita barras de scroll por los elementos flotantes */
+    overflow: hidden; 
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* Contenedor principal para el contenido estático */
 .content-container {
     max-width: 800px; 
     margin: 40px auto; 
     padding: 20px;
     position: relative;
-    z-index: 5; /* Asegura que el contenido de texto esté accesible */
+    z-index: 5; 
 }
 
 h1 { color: #bb86fc; }
@@ -35,20 +34,19 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Estilos para las carpetas flotantes */
 .folder {
     position: absolute;
     z-index: 10;
     width: 100px;
     text-align: center;
     cursor: grab;
-    user-select: none; /* Evita que el texto se seleccione al arrastrar */
-    touch-action: none; /* Para evitar comportamiento por defecto en pantallas táctiles */
+    user-select: none; 
+    touch-action: none; 
 }
 .folder.dragging {
     cursor: grabbing;
-    z-index: 1000; /* Pone la carpeta que se arrastra por encima de las demás */
-    transform: translateZ(0); /* Promueve la carpeta a su propia capa para un movimiento más suave */
+    z-index: 1000; 
+    transform: translateZ(0); 
 }
 .folder a {
     display: flex;
@@ -61,15 +59,14 @@ a:hover {
 .folder img, .folder svg {
     width: 80px;
     height: auto;
-    pointer-events: none; /* Asegura que el evento de arrastre se aplique al div y no a la imagen */
-    -webkit-user-drag: none; /* Evita el drag nativo en WebKit */
+    pointer-events: none; 
+    -webkit-user-drag: none; 
 }
 .folder span {
     margin-top: 8px;
     pointer-events: none;
 }
 
-/* Estilos para los links del footer */
 .footer-links {
     position: fixed;
     bottom: 20px;

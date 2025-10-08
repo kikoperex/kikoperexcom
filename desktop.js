@@ -4,7 +4,7 @@ let pointerId = null;
 let startX = 0;
 let startY = 0;
 
-const DRAG_THRESHOLD = 5; // Umbral de movimiento en píxeles
+const DRAG_THRESHOLD = 5;
 
 document.addEventListener('dragstart', (e) => e.preventDefault());
 
@@ -12,7 +12,6 @@ desktop.addEventListener('pointerdown', (e) => {
     const folder = e.target.closest('.folder');
     if (!folder || e.button !== 0) return;
 
-    // Prevenimos el comportamiento por defecto solo si es un enlace, para no bloquear otros eventos.
     if (e.target.tagName === 'A') {
         e.preventDefault();
     }
@@ -73,7 +72,6 @@ desktop.addEventListener('pointerdown', (e) => {
                 link.addEventListener('click', preventClick, { once: true, capture: true });
             }
         } else {
-            // Si no fue un arrastre, disparamos el clic en el enlace.
             const link = activeFolder.querySelector('a');
             if (link) {
                 link.click();
