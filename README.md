@@ -40,7 +40,7 @@ valiosas:
     *   **Problema:** Mi plan inicial era correr Nginx dentro de un contenedor **Podman**, ya que es daemonless y eso me agradaba. Pero,
 la herramienta de automatización de Certbot necesitaba acceso directo al puerto 80, lo que generó un 
 conflicto.
-    *   **Solución:** Tomé la decisión de pivotar la arquitectura. Migré de una solución en 
+    *   **Solución:** Tomé la decisión de cambiar la arquitectura. Migré de una solución en 
 contenedores a una instalación nativa de Nginx gestionada por `systemd`, lo que simplificó la 
 integración con Certbot y me enseñó a manejar servicios a nivel de sistema operativo.
 
