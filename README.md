@@ -20,7 +20,7 @@ habilidades prácticas.
 
 La solución está desplegada sobre una base de tecnologías estándar en la industria:
 
-*   **Hospedaje:** Instancia `t2.micro` en **Amazon Web Services (AWS EC2)**.
+*   **Hospedaje:** Instancia `t3.micro` en **Amazon Web Services (AWS EC2)**.
 *   **Sistema Operativo:** **Debian 13** 
 *   **Servidor Web:** **Nginx**, configurado como servidor de archivos estáticos y proxy inverso.
 *   **Seguridad:**
