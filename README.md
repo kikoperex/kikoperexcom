@@ -4,42 +4,40 @@ Este repositorio contiene el código fuente y la documentación de infraestructu
 personal, [kikoperex.com](https://kikoperex.com). Este proyecto sirve como mi laboratorio práctico para
 tecnologías de nube, administración de sistemas y redes.
 
-## 1. Motivación y Objetivos (El "Porqué")
+## Motivación y Objetivos
 
-Este proyecto nació con un objetivo simple: **aprender a fondo el funcionamiento de Nginx**. Sin 
-embargo, evolucionó hasta convertirse en un despliegue completo de infraestructura desde cero, con las 
+Este proyecto nació por mi motivación de aprender y conocer **nginx**. y sin querer, se convirtió en un despliegue completo de infraestructura desde cero, con las 
 siguientes metas:
 
-*   **Entender la Infraestructura Real:** Ir más allá de los tutoriales y enfrentar los desafíos de 
+*   **Entender la Infraestructura Real:** Dejar la teoría y experimentar los desafíos de 
 desplegar un servicio en un proveedor de nube real como AWS.
-*   **Dominar el Stack de Servidor Linux:** Configurar un servidor Linux desde cero, instalar software,
+*   **Conocer el Stack de Servidor Linux:** Configurar un servidor Linux desde cero, instalar software,
 gestionar servicios y asegurar el sistema.
 *   **Crear un Portafolio "Vivo":** Tener un proyecto real y accesible en internet que demuestre mis 
 habilidades prácticas.
 
-## 2. Arquitectura y Stack Tecnológico (El "Qué")
+## Arquitectura y Stack Tecnológico
 
 La solución está desplegada sobre una base de tecnologías estándar en la industria:
 
-*   **Cloud:** Instancia `t2.micro` en **Amazon Web Services (AWS EC2)**.
-*   **Sistema Operativo:** **Debian**, una distribución robusta y estable para servidores.
+*   **Hospedaje:** Instancia `t2.micro` en **Amazon Web Services (AWS EC2)**.
+*   **Sistema Operativo:** **Debian 13** 
 *   **Servidor Web:** **Nginx**, configurado como servidor de archivos estáticos y proxy inverso.
 *   **Seguridad:**
     *   Certificado SSL/TLS gestionado por **Let's Encrypt / Certbot** para habilitar HTTPS.
     *   Reglas de firewall configuradas a través de **AWS Security Groups**.
 *   **Redes:** Gestión de **DNS** para apuntar el dominio a la IP pública de la instancia.
-*   **Control de Versiones:** **Git**, para el seguimiento de cambios en el código del sitio y la 
+*   **Control de Versiones:** **Git**
 documentación.
-*   **Automatización:** Scripts de **Bash** para simplificar el flujo de trabajo de actualización del 
-sitio.
+*   **Automatización:** Scripts de **Bash** 
 
-## 3. Desafíos y Aprendizajes Clave (El "Valor")
+## Desafíos y Aprendizajes Clave
 
 Durante la implementación, me enfrenté a varios desafíos que se convirtieron en lecciones prácticas muy
 valiosas:
 
 *   **Desafío 1: Conflicto de Puertos y Herramientas.**
-    *   **Problema:** Mi plan inicial era correr Nginx dentro de un contenedor **Podman**. Sin embargo,
+    *   **Problema:** Mi plan inicial era correr Nginx dentro de un contenedor **Podman**, ya que es daemonless y eso me agradaba. Pero,
 la herramienta de automatización de Certbot necesitaba acceso directo al puerto 80, lo que generó un 
 conflicto.
     *   **Solución:** Tomé la decisión de pivotar la arquitectura. Migré de una solución en 
@@ -49,7 +47,7 @@ integración con Certbot y me enseñó a manejar servicios a nivel de sistema op
 *   **Desafío 2: Diagnóstico de Conectividad HTTPS.**
     *   **Problema:** Después de configurar SSL, el sitio era accesible por HTTP pero no por HTTPS. El 
 navegador mostraba un error de tiempo de espera.
-    *   **Solución:** Apliqué un proceso de diagnóstico en capas. Verifiqué la configuración de Nginx, 
+    *   **Solución:** Intenté varias cosas para llegar a un diagnóstico. Verifiqué la configuración de Nginx, 
 el estado del servicio y los logs de Certbot. Al confirmar que la aplicación estaba bien, investigué la
 siguiente capa: la red. Descubrí que había olvidado abrir el puerto `443` en el **firewall de AWS 
 (Security Group)**.
@@ -59,7 +57,7 @@ troubleshooting metódico.
 
 ### Habilidades Adquiridas
 
-Este proyecto me permitió pasar de la teoría a la práctica en:
+Este proyecto me permitió pasar de la teoría a la práctica y conocer las bases en:
 *   Administración de servidores Linux en un entorno de nube.
 *   Configuración de servidores web y seguridad SSL/TLS.
 *   Diagnóstico de problemas de red y firewalls.
