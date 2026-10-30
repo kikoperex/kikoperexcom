@@ -3,22 +3,36 @@ let activeFolder = null;
 let pointerId = null;
 let startX = 0;
 let startY = 0;
+let didDrag = false;
+let pointerCaptured = false;
 
 const DRAG_THRESHOLD = 5;
 
+// En móvil la carpeta de system-logs arranca más abajo para no tapar el logo ASCII
+const MOBILE_DEFAULTS = {
+    'folder-system': { left: '18%', top: '40%' }
+};
+
 document.addEventListener('dragstart', (e) => e.preventDefault());
+
+// Los clicks sin arrastre navegan de forma nativa. Si el usuario acaba de arrastrar,
+// se descarta el click que el navegador dispara al soltar el puntero.
+desktop.addEventListener('click', (e) => {
+    if (!didDrag) return;
+    didDrag = false;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+}, true);
 
 desktop.addEventListener('pointerdown', (e) => {
     const folder = e.target.closest('.folder');
     if (!folder || e.button !== 0) return;
 
-    if (e.target.tagName === 'A') {
-        e.preventDefault();
-    }
-
     activeFolder = folder;
     pointerId = e.pointerId;
-    
+    didDrag = false;
+    pointerCaptured = false;
+
     startX = e.clientX;
     startY = e.clientY;
 
@@ -26,19 +40,29 @@ desktop.addEventListener('pointerdown', (e) => {
     const offsetX = e.clientX - rect.left;
     const offsetY = e.clientY - rect.top;
 
-    try {
-        activeFolder.setPointerCapture(pointerId);
-    } catch (err) {
-        console.error("Pointer capture failed:", err);
-    }
-
-    activeFolder.classList.add('dragging');
-
     const onPointerMove = (moveEvent) => {
-        if (moveEvent.pointerId !== pointerId) return;
+        if (moveEvent.pointerId !== pointerId || !activeFolder) return;
 
-        let newX = moveEvent.clientX - offsetX;
-        let newY = moveEvent.clientY - offsetY;
+        if (!didDrag) {
+            const deltaX = Math.abs(moveEvent.clientX - startX);
+            const deltaY = Math.abs(moveEvent.clientY - startY);
+            if (deltaX <= DRAG_THRESHOLD && deltaY <= DRAG_THRESHOLD) return;
+
+            didDrag = true;
+            activeFolder.classList.add('dragging');
+
+            // Solo se captura el puntero cuando empieza un arrastre real, para que
+            // los clicks normales sigan siendo clicks nativos sobre el enlace.
+            try {
+                activeFolder.setPointerCapture(pointerId);
+                pointerCaptured = true;
+            } catch (err) {
+                console.error("Pointer capture failed:", err);
+            }
+        }
+
+        const newX = moveEvent.clientX - offsetX;
+        const newY = moveEvent.clientY - offsetY;
 
         const maxX = window.innerWidth - activeFolder.offsetWidth;
         const maxY = window.innerHeight - activeFolder.offsetHeight;
@@ -54,32 +78,19 @@ desktop.addEventListener('pointerdown', (e) => {
         desktop.removeEventListener('pointerup', onPointerUp);
 
         try {
-            activeFolder.releasePointerCapture(pointerId);
+            if (pointerCaptured) activeFolder.releasePointerCapture(pointerId);
         } catch (err) {}
+        pointerCaptured = false;
 
         activeFolder.classList.remove('dragging');
 
-        const deltaX = Math.abs(startX - upEvent.clientX);
-        const deltaY = Math.abs(startY - upEvent.clientY);
-
-        if (deltaX > DRAG_THRESHOLD || deltaY > DRAG_THRESHOLD) {
-            const link = activeFolder.querySelector('a');
-            if (link) {
-                const preventClick = (clickEvent) => {
-                    clickEvent.preventDefault();
-                    clickEvent.stopImmediatePropagation();
-                };
-                link.addEventListener('click', preventClick, { once: true, capture: true });
-            }
-        } else {
-            const link = activeFolder.querySelector('a');
-            if (link) {
-                link.click();
-            }
+        if (didDrag) {
+            localStorage.setItem(activeFolder.id, JSON.stringify({
+                left: activeFolder.style.left,
+                top: activeFolder.style.top
+            }));
         }
 
-        localStorage.setItem(activeFolder.id, JSON.stringify({ left: activeFolder.style.left, top: activeFolder.style.top }));
-        
         activeFolder = null;
     };
 
@@ -89,13 +100,15 @@ desktop.addEventListener('pointerdown', (e) => {
 
 window.addEventListener('pointercancel', (e) => {
     if (!activeFolder || e.pointerId !== pointerId) return;
-    
+
     try {
-        activeFolder.releasePointerCapture(pointerId);
+        if (pointerCaptured) activeFolder.releasePointerCapture(pointerId);
     } catch (err) {}
-    
+    pointerCaptured = false;
+
     activeFolder.classList.remove('dragging');
     activeFolder = null;
+    didDrag = false;
 });
 
 window.addEventListener('load', () => {
@@ -106,6 +119,10 @@ window.addEventListener('load', () => {
             f.style.left = left;
             f.style.top = top;
         } else {
+            if (window.innerWidth <= 768 && MOBILE_DEFAULTS[f.id]) {
+                f.style.left = MOBILE_DEFAULTS[f.id].left;
+                f.style.top = MOBILE_DEFAULTS[f.id].top;
+            }
             const left = f.style.left;
             const top = f.style.top;
             if (left && left.includes('%')) {
@@ -130,4 +147,3 @@ window.addEventListener('resize', () => {
         if (curTop > maxY) f.style.top = maxY + 'px';
     });
 });
-

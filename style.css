@@ -18,11 +18,15 @@ body {
     z-index: 5; 
 }
 
-h1 { color: #bb86fc; }
+h1, h2, h3, h4 {
+    color: #00ff41;
+    font-family: 'Courier New', Courier, monospace;
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.6);
+}
 
 .principio { 
     background-color: #1e1e1e; 
-    border-left: 3px solid #bb86fc; 
+    border-left: 3px solid #00ff41; 
     padding: 15px; 
     margin-bottom: 20px; 
 }
@@ -39,7 +43,7 @@ a:hover {
 .folder {
     position: absolute;
     z-index: 10;
-    width: 100px;
+    width: 96px;
     text-align: center;
     cursor: grab;
     user-select: none; 
@@ -61,16 +65,44 @@ a:hover {
     font-size: 14px;
 }
 
+.folder a:hover {
+    text-decoration: none;
+}
+
 .folder img, .folder svg {
-    width: 80px;
-    height: auto;
+    width: 64px;
+    height: 64px;
     pointer-events: none; 
     -webkit-user-drag: none; 
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+.folder a:hover img {
+    filter: brightness(1.25);
 }
 
 .folder span {
-    margin-top: 8px;
+    margin-top: 4px;
+    padding: 0 4px;
     pointer-events: none;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: #e0e0e0;
+    background-color: #121212;
+    white-space: nowrap;
+    transition: color 120ms linear;
+}
+
+.folder a:hover span {
+    color: #00ff41;
+}
+
+.folder a:focus-visible {
+    outline: 2px solid #00ff41;
+    outline-offset: 4px;
 }
 
 .footer-links {
@@ -146,12 +178,16 @@ a:hover {
     }
     
     .folder {
-        width: 60px;
+        width: 76px;
     }
     
     .folder img, .folder svg {
         width: 48px;
-        height: auto;
+        height: 48px;
+    }
+
+    .folder span {
+        font-size: 11px;
     }
 }
 
