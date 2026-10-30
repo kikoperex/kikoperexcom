@@ -39,7 +39,7 @@ rsync -az --delete --itemize-changes "${DRY_RUN[@]}" \
     --exclude='.gitignore' \
     --exclude='deploy.sh' \
     --exclude='docker-compose.yaml' \
-    --exclude='README.md' \
+    --exclude='*.md' \
     ./ "$HOST:$REMOTE_DIR/"
 
 if (( ${#DRY_RUN[@]} )); then
