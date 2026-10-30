@@ -1,0 +1,9 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: web-kikoperex
+    ports:
+      - "8080:80"
+    volumes:
+      - /mnt/ironwolf/kikoperexcom/data:/usr/share/nginx/html:ro,Z
+    restart: unless-stopped

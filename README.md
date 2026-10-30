@@ -62,3 +62,23 @@ Este proyecto me permitió pasar de la teoría a la práctica y conocer las base
 *   Configuración de servidores web y seguridad SSL/TLS.
 *   Diagnóstico de problemas de red y firewalls.
 *   Creación de flujos de trabajo de despliegue básicos con Bash y Git.
+
+## Despliegue actual
+
+El sitio se sirve desde un servidor Debian en la red local (`192.168.1.71`)
+con **Podman** y **Cloudflare Tunnel**:
+
+*   Contenedor `web-kikoperex` (`nginx:alpine`) escuchando en el puerto `8080`.
+*   Webroot: `/mnt/ironwolf/kikoperexcom/data`, montado en solo lectura.
+*   Definición del contenedor: `docker-compose.yaml`.
+*   Cloudflare Tunnel publica el sitio en `https://kikoperex.com`.
+
+Para desplegar desde la máquina local:
+
+```bash
+./deploy.sh            # sincroniza y verifica
+./deploy.sh --dry-run  # solo muestra los cambios
+```
+
+`deploy.sh` exige un árbol de git limpio, sincroniza con `rsync --delete`
+y comprueba el hash del `index.html` remoto y la respuesta HTTP.
